@@ -24,6 +24,29 @@ public struct AnalyticsEvent: Codable {
     public let videoPosition: Float?
     public let videoPercent: Int?
 
+    // Article metadata fields (matching web tracker)
+    public let creator: String?
+    public let articleAuthor: String?
+    public let articleSection: String?
+    public let articleKeywords: [String]?
+    public let publishedDate: String?
+    public let contentType: String?
+
+    // Navigation tracking
+    public let previousPageUrl: String?
+    public let previousPageTitle: String?
+
+    // Screen dimensions
+    public let screenWidth: Int?
+    public let screenHeight: Int?
+
+    // UTM Campaign parameters
+    public let utmSource: String?
+    public let utmMedium: String?
+    public let utmCampaign: String?
+    public let utmContent: String?
+    public let utmTerm: String?
+
     enum CodingKeys: String, CodingKey {
         case siteId = "site_id"
         case sessionId = "session_id"
@@ -44,6 +67,25 @@ public struct AnalyticsEvent: Codable {
         case videoDuration = "video_duration"
         case videoPosition = "video_position"
         case videoPercent = "video_percent"
+        // Article metadata
+        case creator
+        case articleAuthor = "article_author"
+        case articleSection = "article_section"
+        case articleKeywords = "article_keywords"
+        case publishedDate = "published_date"
+        case contentType = "content_type"
+        // Navigation
+        case previousPageUrl = "previous_page_url"
+        case previousPageTitle = "previous_page_title"
+        // Screen
+        case screenWidth = "screen_width"
+        case screenHeight = "screen_height"
+        // UTM
+        case utmSource = "utm_source"
+        case utmMedium = "utm_medium"
+        case utmCampaign = "utm_campaign"
+        case utmContent = "utm_content"
+        case utmTerm = "utm_term"
     }
 
     public init(
@@ -65,7 +107,22 @@ public struct AnalyticsEvent: Codable {
         videoTitle: String? = nil,
         videoDuration: Float? = nil,
         videoPosition: Float? = nil,
-        videoPercent: Int? = nil
+        videoPercent: Int? = nil,
+        creator: String? = nil,
+        articleAuthor: String? = nil,
+        articleSection: String? = nil,
+        articleKeywords: [String]? = nil,
+        publishedDate: String? = nil,
+        contentType: String? = nil,
+        previousPageUrl: String? = nil,
+        previousPageTitle: String? = nil,
+        screenWidth: Int? = nil,
+        screenHeight: Int? = nil,
+        utmSource: String? = nil,
+        utmMedium: String? = nil,
+        utmCampaign: String? = nil,
+        utmContent: String? = nil,
+        utmTerm: String? = nil
     ) {
         self.siteId = siteId
         self.sessionId = sessionId
@@ -86,6 +143,97 @@ public struct AnalyticsEvent: Codable {
         self.videoDuration = videoDuration
         self.videoPosition = videoPosition
         self.videoPercent = videoPercent
+        self.creator = creator
+        self.articleAuthor = articleAuthor
+        self.articleSection = articleSection
+        self.articleKeywords = articleKeywords
+        self.publishedDate = publishedDate
+        self.contentType = contentType
+        self.previousPageUrl = previousPageUrl
+        self.previousPageTitle = previousPageTitle
+        self.screenWidth = screenWidth
+        self.screenHeight = screenHeight
+        self.utmSource = utmSource
+        self.utmMedium = utmMedium
+        self.utmCampaign = utmCampaign
+        self.utmContent = utmContent
+        self.utmTerm = utmTerm
+    }
+}
+
+/// Screen metadata for article/content tracking
+public struct ScreenMetadata {
+    /// Content creator/editor (e.g., "Dijital Haber Merkezi")
+    public let creator: String?
+
+    /// Article authors (e.g., ["Ahmet Hakan", "Mehmet Yılmaz"])
+    public let authors: [String]?
+
+    /// Content section/category (e.g., "Spor", "Ekonomi")
+    public let section: String?
+
+    /// Content keywords/tags
+    public let keywords: [String]?
+
+    /// Publication date
+    public let publishedDate: Date?
+
+    /// Content type (e.g., "article", "video", "gallery", "live")
+    public let contentType: String?
+
+    public init(
+        creator: String? = nil,
+        authors: [String]? = nil,
+        section: String? = nil,
+        keywords: [String]? = nil,
+        publishedDate: Date? = nil,
+        contentType: String? = nil
+    ) {
+        self.creator = creator
+        self.authors = authors
+        self.section = section
+        self.keywords = keywords
+        self.publishedDate = publishedDate
+        self.contentType = contentType
+    }
+}
+
+/// UTM parameters for campaign tracking (from deep links)
+public struct UTMParameters {
+    public let source: String?
+    public let medium: String?
+    public let campaign: String?
+    public let content: String?
+    public let term: String?
+
+    public init(
+        source: String? = nil,
+        medium: String? = nil,
+        campaign: String? = nil,
+        content: String? = nil,
+        term: String? = nil
+    ) {
+        self.source = source
+        self.medium = medium
+        self.campaign = campaign
+        self.content = content
+        self.term = term
+    }
+
+    /// Parse UTM parameters from a URL
+    public static func from(url: URL) -> UTMParameters {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return UTMParameters()
+        }
+
+        let queryItems = components.queryItems ?? []
+        return UTMParameters(
+            source: queryItems.first { $0.name == "utm_source" }?.value,
+            medium: queryItems.first { $0.name == "utm_medium" }?.value,
+            campaign: queryItems.first { $0.name == "utm_campaign" }?.value,
+            content: queryItems.first { $0.name == "utm_content" }?.value,
+            term: queryItems.first { $0.name == "utm_term" }?.value
+        )
     }
 }
 

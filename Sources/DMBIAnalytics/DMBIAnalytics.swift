@@ -90,13 +90,44 @@ public final class DMBIAnalytics {
 
     // MARK: - Screen Tracking
 
-    /// Track a screen view
+    /// Track a screen view (simple version)
     /// - Parameters:
     ///   - name: Screen name (e.g., "ArticleDetail", "Home")
     ///   - url: Screen URL (e.g., "app://article/123")
     ///   - title: Optional screen title
     public static func trackScreen(name: String, url: String, title: String? = nil) {
-        shared.eventTracker?.trackScreen(name: name, url: url, title: title)
+        shared.eventTracker?.trackScreen(name: name, url: url, title: title, metadata: nil)
+    }
+
+    /// Track a screen view with article metadata
+    /// - Parameters:
+    ///   - name: Screen name (e.g., "ArticleDetail", "Home")
+    ///   - url: Screen URL (e.g., "app://article/123")
+    ///   - title: Optional screen title
+    ///   - metadata: Article metadata (authors, section, keywords, etc.)
+    public static func trackScreen(name: String, url: String, title: String? = nil, metadata: ScreenMetadata) {
+        shared.eventTracker?.trackScreen(name: name, url: url, title: title, metadata: metadata)
+    }
+
+    // MARK: - Deep Link & UTM Tracking
+
+    /// Handle a deep link URL and extract UTM parameters
+    /// Call this when your app opens from a deep link
+    /// - Parameter url: The deep link URL
+    public static func handleDeepLink(url: URL) {
+        shared.eventTracker?.handleDeepLink(url: url)
+    }
+
+    /// Set UTM parameters manually
+    /// - Parameter utm: UTM parameters
+    public static func setUTMParameters(_ utm: UTMParameters) {
+        shared.eventTracker?.setUTMParameters(utm)
+    }
+
+    /// Set referrer source manually
+    /// - Parameter referrer: Referrer identifier (e.g., "facebook", "twitter", "push_notification")
+    public static func setReferrer(_ referrer: String) {
+        shared.eventTracker?.setReferrer(referrer)
     }
 
     // MARK: - Video Tracking

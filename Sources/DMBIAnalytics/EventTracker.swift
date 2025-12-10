@@ -1,4 +1,9 @@
 import Foundation
+#if os(iOS) || os(tvOS)
+import UIKit
+#elseif os(watchOS)
+import WatchKit
+#endif
 
 /// Core event tracking functionality
 final class EventTracker {
@@ -7,8 +12,18 @@ final class EventTracker {
     private let networkQueue: NetworkQueue
 
     private var isLoggedIn: Bool = false
-    private var currentScreen: (name: String, url: String, title: String?)?
+    private var currentScreen: (name: String, url: String, title: String?, metadata: ScreenMetadata?)?
     private var screenEntryTime: Date?
+
+    // Previous screen tracking (like web's previous_page_url)
+    private var previousScreenUrl: String?
+    private var previousScreenTitle: String?
+
+    // UTM parameters (from deep links)
+    private var currentUTM: UTMParameters?
+
+    // Referrer (deep link source, push notification, etc.)
+    private var currentReferrer: String?
 
     init(config: DMBIConfiguration, sessionManager: SessionManager, networkQueue: NetworkQueue) {
         self.config = config
@@ -22,28 +37,71 @@ final class EventTracker {
         self.isLoggedIn = loggedIn
     }
 
+    // MARK: - UTM & Referrer
+
+    func setUTMParameters(_ utm: UTMParameters) {
+        self.currentUTM = utm
+    }
+
+    func setReferrer(_ referrer: String) {
+        self.currentReferrer = referrer
+    }
+
+    func handleDeepLink(url: URL) {
+        // Parse UTM parameters from deep link
+        self.currentUTM = UTMParameters.from(url: url)
+        // Set referrer as the deep link URL scheme
+        self.currentReferrer = url.scheme ?? "deeplink"
+    }
+
     // MARK: - Screen Tracking
 
-    func trackScreen(name: String, url: String, title: String?) {
+    func trackScreen(name: String, url: String, title: String?, metadata: ScreenMetadata? = nil) {
         // Track exit from previous screen if any
         if let previous = currentScreen {
-            trackScreenExit(name: previous.name, url: previous.url, title: previous.title)
+            trackScreenExit(
+                name: previous.name,
+                url: previous.url,
+                title: previous.title,
+                metadata: previous.metadata
+            )
         }
 
+        // Save previous screen info BEFORE updating current
+        previousScreenUrl = currentScreen?.url
+        previousScreenTitle = currentScreen?.title
+
         // Record new screen
-        currentScreen = (name, url, title)
+        currentScreen = (name, url, title, metadata)
         screenEntryTime = Date()
+
+        // Format published date if present
+        var publishedDateString: String? = nil
+        if let date = metadata?.publishedDate {
+            let formatter = ISO8601DateFormatter()
+            publishedDateString = formatter.string(from: date)
+        }
 
         let event = createEvent(
             eventType: "screen_view",
             pageUrl: url,
             pageTitle: title,
-            customData: ["screen_name": name]
+            customData: ["screen_name": name],
+            // Article metadata
+            creator: metadata?.creator,
+            articleAuthor: metadata?.authors?.joined(separator: ", "),
+            articleSection: metadata?.section,
+            articleKeywords: metadata?.keywords,
+            publishedDate: publishedDateString,
+            contentType: metadata?.contentType
         )
         enqueue(event)
+
+        // Clear UTM after first screen view (single attribution)
+        // Keep referrer for the session
     }
 
-    private func trackScreenExit(name: String, url: String, title: String?) {
+    private func trackScreenExit(name: String, url: String, title: String?, metadata: ScreenMetadata?) {
         guard let entryTime = screenEntryTime else { return }
 
         let duration = Int(Date().timeIntervalSince(entryTime))
@@ -73,7 +131,12 @@ final class EventTracker {
     func trackAppClose() {
         // Track screen exit for current screen
         if let current = currentScreen {
-            trackScreenExit(name: current.name, url: current.url, title: current.title)
+            trackScreenExit(
+                name: current.name,
+                url: current.url,
+                title: current.title,
+                metadata: current.metadata
+            )
         }
 
         let event = createEvent(
@@ -165,6 +228,9 @@ final class EventTracker {
     }
 
     func trackPushOpened(notificationId: String?, title: String?, campaign: String?) {
+        // Set referrer when opening from push
+        self.currentReferrer = "push_notification"
+
         var customData: [String: Any] = [:]
         if let notificationId = notificationId { customData["notification_id"] = notificationId }
         if let campaign = campaign { customData["campaign"] = campaign }
@@ -211,6 +277,20 @@ final class EventTracker {
         networkQueue.retryOfflineEvents()
     }
 
+    // MARK: - Screen Dimensions
+
+    private func getScreenDimensions() -> (width: Int, height: Int) {
+        #if os(iOS) || os(tvOS)
+        let screen = UIScreen.main.bounds
+        return (Int(screen.width), Int(screen.height))
+        #elseif os(watchOS)
+        let screen = WKInterfaceDevice.current().screenBounds
+        return (Int(screen.width), Int(screen.height))
+        #else
+        return (0, 0)
+        #endif
+    }
+
     // MARK: - Event Creation
 
     private func createEvent(
@@ -224,7 +304,14 @@ final class EventTracker {
         videoTitle: String? = nil,
         videoDuration: Float? = nil,
         videoPosition: Float? = nil,
-        videoPercent: Int? = nil
+        videoPercent: Int? = nil,
+        // Article metadata
+        creator: String? = nil,
+        articleAuthor: String? = nil,
+        articleSection: String? = nil,
+        articleKeywords: [String]? = nil,
+        publishedDate: String? = nil,
+        contentType: String? = nil
     ) -> AnalyticsEvent {
         sessionManager.updateActivity()
 
@@ -236,6 +323,8 @@ final class EventTracker {
             }
         }
 
+        let screenDimensions = getScreenDimensions()
+
         return AnalyticsEvent(
             siteId: config.siteId,
             sessionId: sessionManager.sessionId,
@@ -243,7 +332,7 @@ final class EventTracker {
             eventType: eventType,
             pageUrl: pageUrl,
             pageTitle: pageTitle,
-            referrer: nil,
+            referrer: currentReferrer,
             deviceType: sessionManager.deviceType,
             userAgent: sessionManager.userAgent,
             isLoggedIn: isLoggedIn,
@@ -255,7 +344,26 @@ final class EventTracker {
             videoTitle: videoTitle,
             videoDuration: videoDuration,
             videoPosition: videoPosition,
-            videoPercent: videoPercent
+            videoPercent: videoPercent,
+            // Article metadata
+            creator: creator,
+            articleAuthor: articleAuthor,
+            articleSection: articleSection,
+            articleKeywords: articleKeywords,
+            publishedDate: publishedDate,
+            contentType: contentType,
+            // Previous screen
+            previousPageUrl: previousScreenUrl,
+            previousPageTitle: previousScreenTitle,
+            // Screen dimensions
+            screenWidth: screenDimensions.width,
+            screenHeight: screenDimensions.height,
+            // UTM parameters
+            utmSource: currentUTM?.source,
+            utmMedium: currentUTM?.medium,
+            utmCampaign: currentUTM?.campaign,
+            utmContent: currentUTM?.content,
+            utmTerm: currentUTM?.term
         )
     }
 
