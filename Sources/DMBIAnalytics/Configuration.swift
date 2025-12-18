@@ -8,9 +8,6 @@ public struct DMBIConfiguration {
     /// Analytics endpoint URL
     public let endpoint: URL
 
-    /// Secret key for request signing (required for security)
-    public var secretKey: String = ""
-
     /// Heartbeat interval in seconds (default: 30)
     public var heartbeatInterval: TimeInterval = 30
 
