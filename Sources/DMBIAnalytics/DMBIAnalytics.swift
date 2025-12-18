@@ -58,18 +58,6 @@ public final class DMBIAnalytics {
 
         self.config = config
 
-        // Initialize signature helper for request authentication
-        if !config.secretKey.isEmpty {
-            SignatureHelper.initialize(key: config.secretKey)
-            if config.debugLogging {
-                print("[DMBIAnalytics] Request signing enabled")
-            }
-        } else {
-            if config.debugLogging {
-                print("[DMBIAnalytics] Warning: No secret key provided - requests will not be signed")
-            }
-        }
-
         // Initialize components
         sessionManager = SessionManager(sessionTimeout: config.sessionTimeout)
 

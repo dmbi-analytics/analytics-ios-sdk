@@ -69,24 +69,13 @@ final class NetworkQueue {
             encoder.dateEncodingStrategy = .iso8601
             let data = try encoder.encode(events)
 
-            // Generate signature for request authentication
-            let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-            let signature = SignatureHelper.sign(timestamp: timestamp, payload: data)
-
             var request = URLRequest(url: endpoint)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            // Add security headers if signature is available
-            if !signature.isEmpty {
-                request.setValue(String(timestamp), forHTTPHeaderField: "X-Timestamp")
-                request.setValue(signature, forHTTPHeaderField: "X-Signature")
-            }
-
             request.httpBody = data
 
             if debugLogging {
-                print("[DMBIAnalytics] Sending \(events.count) events to \(endpoint) (signed: \(!signature.isEmpty))")
+                print("[DMBIAnalytics] Sending \(events.count) events to \(endpoint)")
             }
 
             let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
@@ -175,20 +164,9 @@ final class NetworkQueue {
             encoder.dateEncodingStrategy = .iso8601
             let data = try encoder.encode(events)
 
-            // Generate signature for request authentication
-            let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-            let signature = SignatureHelper.sign(timestamp: timestamp, payload: data)
-
             var request = URLRequest(url: endpoint)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            // Add security headers if signature is available
-            if !signature.isEmpty {
-                request.setValue(String(timestamp), forHTTPHeaderField: "X-Timestamp")
-                request.setValue(signature, forHTTPHeaderField: "X-Signature")
-            }
-
             request.httpBody = data
 
             let task = urlSession.dataTask(with: request) { data, response, error in
