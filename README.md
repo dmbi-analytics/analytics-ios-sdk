@@ -20,7 +20,7 @@ Add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/dmbi-analytics/analytics-ios-sdk.git", from: "1.0.2")
+    .package(url: "https://github.com/dmbi-analytics/analytics-ios-sdk.git", from: "1.0.3")
 ]
 ```
 
@@ -29,7 +29,7 @@ Or in Xcode: File > Add Packages > Enter URL: `https://github.com/dmbi-analytics
 ### CocoaPods
 
 ```ruby
-pod 'DMBIAnalytics', '~> 1.0.2'
+pod 'DMBIAnalytics', '~> 1.0.3'
 ```
 
 ## Quick Start
