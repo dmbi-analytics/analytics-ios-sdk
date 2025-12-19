@@ -7,6 +7,7 @@ final class NetworkQueue {
     private let flushInterval: TimeInterval
     private let maxRetryCount: Int
     private let debugLogging: Bool
+    private let userAgent: String
 
     private var eventQueue: [AnalyticsEvent] = []
     private var flushTimer: Timer?
@@ -15,12 +16,13 @@ final class NetworkQueue {
 
     private var offlineStore: OfflineStore?
 
-    init(endpoint: URL, batchSize: Int, flushInterval: TimeInterval, maxRetryCount: Int, debugLogging: Bool) {
+    init(endpoint: URL, batchSize: Int, flushInterval: TimeInterval, maxRetryCount: Int, debugLogging: Bool, userAgent: String) {
         self.endpoint = endpoint
         self.batchSize = batchSize
         self.flushInterval = flushInterval
         self.maxRetryCount = maxRetryCount
         self.debugLogging = debugLogging
+        self.userAgent = userAgent
 
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
@@ -72,6 +74,7 @@ final class NetworkQueue {
             var request = URLRequest(url: endpoint)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
             request.httpBody = data
 
             if debugLogging {
@@ -167,6 +170,7 @@ final class NetworkQueue {
             var request = URLRequest(url: endpoint)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
             request.httpBody = data
 
             let task = urlSession.dataTask(with: request) { data, response, error in
