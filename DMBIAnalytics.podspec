@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'DMBIAnalytics'
-  s.version          = '1.0.1'
+  s.version          = '1.0.9'
   s.summary          = 'Native iOS SDK for DMBI Analytics platform'
   s.description      = <<-DESC
 Native iOS SDK for DMBI Analytics platform. Track screen views, video engagement,
