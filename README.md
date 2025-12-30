@@ -26,12 +26,6 @@ dependencies: [
 
 Or in Xcode: File > Add Packages > Enter URL: `https://github.com/capra-solutions/analytics-ios-sdk.git`
 
-### CocoaPods
-
-```ruby
-pod 'CapraAnalytics', '~> 2.0.0'
-```
-
 ## Migration from DMBIAnalytics 1.x
 
 If upgrading from version 1.x:
