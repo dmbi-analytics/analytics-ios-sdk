@@ -93,7 +93,7 @@ public class YouTubePlayerWrapper: NSObject, YTPlayerViewDelegate {
     private func trackImpression() {
         guard let id = videoId else { return }
 
-        DMBIAnalytics.trackVideoImpression(
+        CapraAnalytics.trackVideoImpression(
             videoId: id,
             title: videoTitle,
             duration: videoDuration > 0 ? videoDuration : nil
@@ -103,7 +103,7 @@ public class YouTubePlayerWrapper: NSObject, YTPlayerViewDelegate {
     private func trackPlay() {
         guard let id = videoId else { return }
 
-        DMBIAnalytics.trackVideoPlay(
+        CapraAnalytics.trackVideoPlay(
             videoId: id,
             title: videoTitle,
             duration: videoDuration > 0 ? videoDuration : nil,
@@ -115,7 +115,7 @@ public class YouTubePlayerWrapper: NSObject, YTPlayerViewDelegate {
         guard let id = videoId else { return }
         let percent = calculatePercent()
 
-        DMBIAnalytics.trackVideoPause(
+        CapraAnalytics.trackVideoPause(
             videoId: id,
             position: currentPosition,
             percent: percent
@@ -125,7 +125,7 @@ public class YouTubePlayerWrapper: NSObject, YTPlayerViewDelegate {
     private func trackComplete() {
         guard let id = videoId else { return }
 
-        DMBIAnalytics.trackVideoComplete(
+        CapraAnalytics.trackVideoComplete(
             videoId: id,
             duration: videoDuration > 0 ? videoDuration : nil
         )
@@ -134,7 +134,7 @@ public class YouTubePlayerWrapper: NSObject, YTPlayerViewDelegate {
     private func trackQuartile(_ percent: Int) {
         guard let id = videoId else { return }
 
-        DMBIAnalytics.trackVideoProgress(
+        CapraAnalytics.trackVideoProgress(
             videoId: id,
             duration: videoDuration > 0 ? videoDuration : nil,
             position: currentPosition,

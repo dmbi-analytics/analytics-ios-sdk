@@ -141,7 +141,7 @@ public class AVPlayerWrapper {
         guard let id = videoId else { return }
         let duration = videoDuration ?? getDuration()
 
-        DMBIAnalytics.trackVideoImpression(
+        CapraAnalytics.trackVideoImpression(
             videoId: id,
             title: videoTitle,
             duration: duration
@@ -153,7 +153,7 @@ public class AVPlayerWrapper {
         let duration = videoDuration ?? getDuration()
         let position = getCurrentPosition()
 
-        DMBIAnalytics.trackVideoPlay(
+        CapraAnalytics.trackVideoPlay(
             videoId: id,
             title: videoTitle,
             duration: duration,
@@ -166,7 +166,7 @@ public class AVPlayerWrapper {
         let position = getCurrentPosition()
         let percent = calculatePercent()
 
-        DMBIAnalytics.trackVideoPause(
+        CapraAnalytics.trackVideoPause(
             videoId: id,
             position: position,
             percent: percent
@@ -177,7 +177,7 @@ public class AVPlayerWrapper {
         guard let id = videoId else { return }
         let duration = videoDuration ?? getDuration()
 
-        DMBIAnalytics.trackVideoComplete(
+        CapraAnalytics.trackVideoComplete(
             videoId: id,
             duration: duration
         )
@@ -188,7 +188,7 @@ public class AVPlayerWrapper {
         let duration = videoDuration ?? getDuration()
         let position = getCurrentPosition()
 
-        DMBIAnalytics.trackVideoProgress(
+        CapraAnalytics.trackVideoProgress(
             videoId: id,
             duration: duration,
             position: position,

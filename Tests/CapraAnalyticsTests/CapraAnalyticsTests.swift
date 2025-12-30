@@ -1,7 +1,7 @@
 import XCTest
-@testable import DMBIAnalytics
+@testable import CapraAnalytics
 
-final class DMBIAnalyticsTests: XCTestCase {
+final class CapraAnalyticsTests: XCTestCase {
 
     func testEventCreation() throws {
         let event = AnalyticsEvent(
@@ -12,7 +12,7 @@ final class DMBIAnalyticsTests: XCTestCase {
             pageUrl: "app://home",
             pageTitle: "Home Screen",
             deviceType: "ios_phone",
-            userAgent: "DMBIAnalytics/1.0.0 iOS/17.0"
+            userAgent: "CapraAnalytics/2.0.0 iOS/17.0"
         )
 
         XCTAssertEqual(event.siteId, "test-site")
@@ -29,7 +29,7 @@ final class DMBIAnalyticsTests: XCTestCase {
             eventType: "screen_view",
             pageUrl: "app://home",
             deviceType: "ios_phone",
-            userAgent: "DMBIAnalytics/1.0.0"
+            userAgent: "CapraAnalytics/2.0.0"
         )
 
         let encoder = JSONEncoder()
@@ -45,7 +45,7 @@ final class DMBIAnalyticsTests: XCTestCase {
     }
 
     func testConfigurationDefaults() throws {
-        let config = DMBIConfiguration(siteId: "test", endpoint: "https://example.com/e")
+        let config = CapraConfiguration(siteId: "test", endpoint: "https://example.com/e")
 
         XCTAssertEqual(config.siteId, "test")
         XCTAssertEqual(config.heartbeatInterval, 60)

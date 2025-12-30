@@ -110,7 +110,7 @@ public class DailymotionPlayerWrapper: NSObject, DMPlayerViewControllerDelegate 
         guard let id = videoId else { return }
         let duration = videoDuration ?? Float(totalDuration)
 
-        DMBIAnalytics.trackVideoImpression(
+        CapraAnalytics.trackVideoImpression(
             videoId: id,
             title: videoTitle,
             duration: duration > 0 ? duration : nil
@@ -121,7 +121,7 @@ public class DailymotionPlayerWrapper: NSObject, DMPlayerViewControllerDelegate 
         guard let id = videoId else { return }
         let duration = videoDuration ?? Float(totalDuration)
 
-        DMBIAnalytics.trackVideoPlay(
+        CapraAnalytics.trackVideoPlay(
             videoId: id,
             title: videoTitle,
             duration: duration > 0 ? duration : nil,
@@ -133,7 +133,7 @@ public class DailymotionPlayerWrapper: NSObject, DMPlayerViewControllerDelegate 
         guard let id = videoId else { return }
         let percent = calculatePercent()
 
-        DMBIAnalytics.trackVideoPause(
+        CapraAnalytics.trackVideoPause(
             videoId: id,
             position: Float(currentPosition),
             percent: percent
@@ -144,7 +144,7 @@ public class DailymotionPlayerWrapper: NSObject, DMPlayerViewControllerDelegate 
         guard let id = videoId else { return }
         let duration = videoDuration ?? Float(totalDuration)
 
-        DMBIAnalytics.trackVideoComplete(
+        CapraAnalytics.trackVideoComplete(
             videoId: id,
             duration: duration > 0 ? duration : nil
         )
@@ -154,7 +154,7 @@ public class DailymotionPlayerWrapper: NSObject, DMPlayerViewControllerDelegate 
         guard let id = videoId else { return }
         let duration = videoDuration ?? Float(totalDuration)
 
-        DMBIAnalytics.trackVideoProgress(
+        CapraAnalytics.trackVideoProgress(
             videoId: id,
             duration: duration > 0 ? duration : nil,
             position: Float(currentPosition),
