@@ -57,6 +57,22 @@ Version 3.0.0 includes a breaking change for Dailymotion player integration:
 
 If you're not using DailymotionPlayerWrapper, no changes are needed.
 
+## Migration from 3.0.x to 3.1.0
+
+Version 3.1.0 adds required `DMPlayerDelegate` methods for Dailymotion SDK compatibility:
+
+**Breaking change for DailymotionPlayerWrapper:**
+
+```swift
+// Before (3.0.x):
+DailymotionPlayerWrapper(player: player)
+
+// After (3.1.0):
+DailymotionPlayerWrapper(player: player, presentingViewController: self)
+```
+
+The `presentingViewController` is required for fullscreen playback and ad presentation.
+
 ## Quick Start
 
 ### 1. Initialize in AppDelegate
@@ -223,18 +239,28 @@ class VideoViewController: UIViewController {
 
 import CapraAnalytics
 
-// Create player using Dailymotion SDK
-Dailymotion.createPlayer(
-    playerId: "YOUR_PLAYER_ID",
-    videoId: "x8abc123"
-) { result in
-    switch result {
-    case .success(let player):
-        let wrapper = DailymotionPlayerWrapper(player: player)
-        wrapper.attach(videoId: "x8abc123", title: "Video Title")
-        // Add player view to hierarchy
-    case .failure(let error):
-        print("Error: \(error)")
+class VideoViewController: UIViewController {
+    private var wrapper: DailymotionPlayerWrapper?
+
+    func setupPlayer() {
+        Dailymotion.createPlayer(
+            playerId: "YOUR_PLAYER_ID",
+            videoId: "x8abc123"
+        ) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let player):
+                // Pass self as presentingViewController for fullscreen/ad support
+                self.wrapper = DailymotionPlayerWrapper(
+                    player: player,
+                    presentingViewController: self
+                )
+                self.wrapper?.attach(videoId: "x8abc123", title: "Video Title")
+                // Add player view to hierarchy
+            case .failure(let error):
+                print("Error: \(error)")
+            }
+        }
     }
 }
 ```
