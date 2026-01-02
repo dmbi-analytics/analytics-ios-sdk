@@ -1,5 +1,6 @@
 #if canImport(DailymotionPlayerSDK)
 import Foundation
+import UIKit
 import DailymotionPlayerSDK
 
 /// Wrapper for Dailymotion iOS Player that automatically tracks video analytics events.
@@ -16,7 +17,7 @@ import DailymotionPlayerSDK
 /// ) { result in
 ///     switch result {
 ///     case .success(let player):
-///         self.wrapper = DailymotionPlayerWrapper(player: player)
+///         self.wrapper = DailymotionPlayerWrapper(player: player, presentingViewController: self)
 ///         self.wrapper.attach(videoId: "x8abc123", title: "Video Title")
 ///         // Add player view to hierarchy
 ///     case .failure(let error):
@@ -29,6 +30,7 @@ public class DailymotionPlayerWrapper: NSObject {
     // MARK: - Properties
 
     private weak var player: DMPlayerView?
+    private weak var presentingViewController: UIViewController?
     private var videoId: String?
     private var videoTitle: String?
     private var videoDuration: Float?
@@ -40,8 +42,14 @@ public class DailymotionPlayerWrapper: NSObject {
 
     // MARK: - Initialization
 
-    public init(player: DMPlayerView) {
+    /// Initialize the wrapper with a Dailymotion player and presenting view controller.
+    ///
+    /// - Parameters:
+    ///   - player: The DMPlayerView instance
+    ///   - presentingViewController: The view controller that will present fullscreen/ad views (required by DMPlayerDelegate)
+    public init(player: DMPlayerView, presentingViewController: UIViewController) {
         self.player = player
+        self.presentingViewController = presentingViewController
         super.init()
     }
 
@@ -231,6 +239,25 @@ extension DailymotionPlayerWrapper: DMVideoDelegate {
 // MARK: - DMPlayerDelegate
 
 extension DailymotionPlayerWrapper: DMPlayerDelegate {
+
+    // MARK: Required Methods
+
+    public func player(_ player: DMPlayerView, openUrl url: URL) {
+        // Open URL in Safari/default browser
+        UIApplication.shared.open(url)
+    }
+
+    public func playerWillPresentFullscreenViewController(_ player: DMPlayerView) -> UIViewController {
+        // Return the presenting view controller for fullscreen playback
+        return presentingViewController ?? UIViewController()
+    }
+
+    public func playerWillPresentAdInParentViewController(_ player: DMPlayerView) -> UIViewController {
+        // Return the presenting view controller for ad presentation
+        return presentingViewController ?? UIViewController()
+    }
+
+    // MARK: Optional Methods
 
     public func playerDidStart(_ player: DMPlayerView) {
         // Player started
